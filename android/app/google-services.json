@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "683483442680",
+    "project_id": "communitychat-d2245",
+    "storage_bucket": "communitychat-d2245.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:683483442680:android:996c7a2d1b45287a057a0d",
+        "android_client_info": {
+          "package_name": "com.communitychat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "683483442680-cn270v9lseq8cj42sv8josoore2eos2r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.communitychat",
+            "certificate_hash": "89f25e7ffc14228310cfd8d14230e44efce362ab"
+          }
+        },
+        {
+          "client_id": "683483442680-thk7bc476b9k7jp99kefllrqa95ck16a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1_qVbg9c1wsvHZIKMLpcdxGU0qeMHgjc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "683483442680-thk7bc476b9k7jp99kefllrqa95ck16a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "683483442680-483pe5ckf87fq5ocb9g3ou11je03ronc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.communitycha"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
