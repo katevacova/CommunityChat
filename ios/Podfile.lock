@@ -1,5 +1,7 @@
 PODS:
   - boost (1.84.0)
+  - BVLinearGradient (2.8.3):
+    - React-Core
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.76.6)
   - Firebase/CoreOnly (11.7.0):
@@ -1258,6 +1260,72 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-safe-area-context (5.1.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - react-native-safe-area-context/common (= 5.1.0)
+    - react-native-safe-area-context/fabric (= 5.1.0)
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - react-native-safe-area-context/common (5.1.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - react-native-safe-area-context/fabric (5.1.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - react-native-safe-area-context/common
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - React-nativeconfig (0.76.6)
   - React-NativeModulesApple (0.76.6):
     - glog
@@ -1528,11 +1596,165 @@ PODS:
   - RNFBApp (21.7.1):
     - Firebase/CoreOnly (= 11.7.0)
     - React-Core
+  - RNReanimated (3.16.7):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNReanimated/reanimated (= 3.16.7)
+    - RNReanimated/worklets (= 3.16.7)
+    - Yoga
+  - RNReanimated/reanimated (3.16.7):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNReanimated/reanimated/apple (= 3.16.7)
+    - Yoga
+  - RNReanimated/reanimated/apple (3.16.7):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNReanimated/worklets (3.16.7):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNScreens (4.5.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-RCTImage
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - RNScreens/common (= 4.5.0)
+    - Yoga
+  - RNScreens/common (4.5.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-RCTImage
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
+  - RNVectorIcons (10.2.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
+  - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
@@ -1569,6 +1791,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1597,6 +1820,9 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
+  - RNReanimated (from `../node_modules/react-native-reanimated`)
+  - RNScreens (from `../node_modules/react-native-screens`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1610,6 +1836,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
+  BVLinearGradient:
+    :path: "../node_modules/react-native-linear-gradient"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   FBLazyVector:
@@ -1679,6 +1907,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-safe-area-context:
+    :path: "../node_modules/react-native-safe-area-context"
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
   React-NativeModulesApple:
@@ -1735,11 +1965,18 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
+  RNReanimated:
+    :path: "../node_modules/react-native-reanimated"
+  RNScreens:
+    :path: "../node_modules/react-native-screens"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
   boost: 1dca942403ed9342f98334bf4c3621f011aa7946
+  BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   FBLazyVector: be509404b5de73a64a74284edcaf73a5d1e128b1
   Firebase: a64bf6a8546e6eab54f1c715cd6151f39d2329f4
@@ -1778,6 +2015,7 @@ SPEC CHECKSUMS:
   React-logger: d42a53754a7252cc7a851315f0da2e46b450ea92
   React-Mapbuffer: 5e03437905ef365c5b29cc261403fd5246cba292
   React-microtasksnativemodule: 7f4d1c22c4de3425995c30f6bf9136cff922aadc
+  react-native-safe-area-context: 11cf61d0ee683a27e0b30acbe6a58cbaf37da106
   React-nativeconfig: 014403841159c621de6d2f888ad829aac530f93e
   React-NativeModulesApple: d92ce55cd2e351c54c08671a5198579920588688
   React-perflogger: f260e2de95f9dbd002035251559c13bf1f0643d4
@@ -1806,6 +2044,9 @@ SPEC CHECKSUMS:
   ReactCodegen: 2f96de87b7680e294a46fc52b4399d51ec90cb6b
   ReactCommon: 09e5005e0ea50a4e36f412990212140e5b8f1db3
   RNFBApp: 32f7425af42aef99472dd46e14222cb0a8a17504
+  RNReanimated: 23d4dd74e67d9eb5648839dcaabc00be8aba6af4
+  RNScreens: 09f7a66d59a40dd4c0f012d69d2abb13c81cd3bc
+  RNVectorIcons: 959270651e3b1bd49d6c469fc9ac52149f67f55c
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: fd4ca32b81c4069b4175ad9460b042e17db94b66
 
