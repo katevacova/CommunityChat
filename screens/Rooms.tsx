@@ -2,11 +2,15 @@ import {Text, View, TouchableOpacity, StyleSheet, Button} from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { RoomsProps } from '../Props';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUser } from '../UserContext.tsx';
 
 const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
+  const userProvider = useUser();
+  const user = userProvider.user;
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.logo}>This screen will display rooms</Text>
+            <Text style={styles.logo}>{user?.email}</Text>
             <Button title="Go to Chat" onPress={() => navigation.navigate('Chat')} />
         </SafeAreaView>
     );

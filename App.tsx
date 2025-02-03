@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import type {PropsWithChildren} from 'react';
@@ -19,6 +19,8 @@ import SignIn from './screens/SignIn';
 import Chat from './screens/Chat';
 import Rooms from './screens/Rooms';
 import { RootStackParamList } from './types'; 
+import auth from '@react-native-firebase/auth';
+import { UserProvider, useUser } from './UserContext.tsx';
 
 import {
   Colors,
@@ -27,6 +29,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import Splash from './screens/Splash';
 
 /*type SectionProps = PropsWithChildren<{
   title: string;
@@ -67,7 +70,30 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };*/
 
-  return (
+  /*const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState();
+
+  function onAuthStateChanged(user: any) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);*/
+
+  const userProvider = useUser();
+  const user = userProvider.user;
+
+  if (userProvider.initializing) return ( // Splash screen
+    <View style={styles.sectionContainer}>
+      <Text style={styles.sectionDescription}>Welcome to CommunityChat</Text>
+      </View>
+  );
+
+  if (!user) {
+    return (
       <NavigationContainer>
         <Stack.Navigator initialRouteName="SignIn">
           <Stack.Screen name="SignIn" component={SignIn} />
@@ -76,10 +102,21 @@ function App(): React.JSX.Element {
 
         </Stack.Navigator>
       </NavigationContainer>
+    );
+  }
+
+  return (
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Rooms">
+          <Stack.Screen name="Rooms" component={Rooms} />
+          <Stack.Screen name="Chat" component={Chat} />
+
+        </Stack.Navigator>
+      </NavigationContainer>
   );
 }
 
-/*const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
@@ -96,6 +133,10 @@ function App(): React.JSX.Element {
   highlight: {
     fontWeight: '700',
   },
-});*/
+});
 
-export default App;
+export default () => (
+  <UserProvider>
+    <App/>
+  </UserProvider>
+);

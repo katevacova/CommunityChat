@@ -5,9 +5,128 @@ import {
   } from '@react-navigation/native';
 import { SignInProps } from '../Props';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+    GoogleSignin,
+    isErrorWithCode,
+    statusCodes,
+} from "@react-native-google-signin/google-signin";
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { useUser } from '../UserContext.tsx';
+import { Pressable, Alert } from 'react-native'
+import React, { useState, useEffect } from 'react';
 
 const SignIn: React.FC<SignInProps> = ({ navigation }) => {
 
+    GoogleSignin.configure({
+        webClientId: '683483442680-thk7bc476b9k7jp99kefllrqa95ck16a.apps.googleusercontent.com',
+        offlineAccess: true,
+    });
+
+
+  /*const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+
+  function onAuthStateChanged(user: any) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []); */
+
+  const user = useUser().user;
+
+
+    async function onGoogleButtonPress() {
+        if (user) {
+          // user is already logged in so no need to do anything
+          return null;
+        }
+      
+        try {
+          // Check if your device supports Google Play
+          await GoogleSignin.hasPlayServices({
+            showPlayServicesUpdateDialog: true,
+          });
+      
+          const { type, data } = await GoogleSignin.signIn();
+      
+          /**
+           * @type can be "cancelled" in which can @data will be 'null'; 
+           * If @type is "success" then @data will be:
+           * user: {
+                  id: string;
+                  name: string | null;
+                  email: string;
+                  photo: string | null;
+                  familyName: string | null;
+                  givenName: string | null;
+              };
+              scopes: string[];
+              idToken: string | null;
+              serverAuthCode: string | null;
+           */
+      
+          if (type === 'success') {
+            // const { id, name, email, photo, familyName, givenName } = data.user;
+      
+            // Create a Google credential with the token
+            const googleCredential = auth.GoogleAuthProvider.credential(data.idToken);
+      
+            // Sign-in the user with the credential
+            return auth().signInWithCredential(googleCredential);
+          } else if (type === 'cancelled') {
+            // When the user cancels the flow for any operation that requires user interaction.
+            return; // do nothing
+          }
+        } catch (error) {
+          console.error('ERROR: ', error);
+          return error;
+        }
+      }
+
+      const renderGoogleSigninButton = () => {
+
+        const buttonTitle = user ? `Signed in as: ${user.displayName}` : 'Continue with Google'
+
+        return (
+            <Pressable style={styles.socialButton} onPress={() => onGoogleButtonPress()
+                .then((value) => {
+                  const userCredential = value as FirebaseAuthTypes.UserCredential | null;
+                  if (userCredential) {
+                    console.log('value.additionalUserInfo: ', userCredential.additionalUserInfo);
+                    console.log('value.user: ', userCredential.user);
+                  }
+                }).catch((error) => {
+                if (isErrorWithCode(error)) {
+                    switch (error.code) {
+                        case statusCodes.SIGN_IN_CANCELLED:
+                            // user cancelled the login flow
+                            Alert.alert("User cancelled the login flow. Please try again.");
+                            break;
+                        case statusCodes.IN_PROGRESS:
+                            // operation (eg. sign in) already in progress
+                            Alert.alert("Sign In already in progress. Please wait.");
+                            break;
+                        case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+                            // play services not available or outdated
+                            Alert.alert("Play services not available or outdated. Please update your play services.");
+                            break;
+                        default:
+                            // some other error happened
+                            Alert.alert("An unknown error occurred. Please try again later.");
+                    }
+                } else {
+                    // an error that's not related to google sign in occurred
+                    Alert.alert("An error that's not related to google sign in occurred. Please try again later.");
+                }
+            })}>
+                <Text>{buttonTitle}</Text>
+            </Pressable>
+        )
+    }
     const goToRooms = () => { navigation.navigate('Rooms') };
 
     return (
@@ -15,10 +134,7 @@ const SignIn: React.FC<SignInProps> = ({ navigation }) => {
         <Text style={styles.logo}>Welcome to CommunityChat</Text>
         <Text style={styles.title}>Sign in</Text>
 
-        <TouchableOpacity style={styles.socialButton} onPress={goToRooms}>
-          <Icon name="google" size={20} color="#000" />
-          <Text style={styles.socialButtonText}>Continue with Google</Text>
-        </TouchableOpacity>
+        {renderGoogleSigninButton()}
 
         <TouchableOpacity style={styles.socialButton} onPress={goToRooms}>
           <Icon name="facebook" size={20} color="#000" />
