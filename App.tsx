@@ -21,6 +21,7 @@ import Rooms from './screens/Rooms';
 import { RootStackParamList } from './types'; 
 import auth from '@react-native-firebase/auth';
 import { UserProvider, useUser } from './UserContext.tsx';
+import UserSettingsButton from './components/UserSettingsButton.tsx';
 
 import {
   Colors,
@@ -70,19 +71,6 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };*/
 
-  /*const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
-
-  function onAuthStateChanged(user: any) {
-    setUser(user);
-    if (initializing) setInitializing(false);
-  }
-
-  useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
-  }, []);*/
-
   const userProvider = useUser();
   const user = userProvider.user;
 
@@ -96,10 +84,7 @@ function App(): React.JSX.Element {
     return (
       <NavigationContainer>
         <Stack.Navigator initialRouteName="SignIn">
-          <Stack.Screen name="SignIn" component={SignIn} />
-          <Stack.Screen name="Rooms" component={Rooms} />
-          <Stack.Screen name="Chat" component={Chat} />
-
+          <Stack.Screen name="SignIn" component={SignIn}/>
         </Stack.Navigator>
       </NavigationContainer>
     );
@@ -108,7 +93,18 @@ function App(): React.JSX.Element {
   return (
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Rooms">
-          <Stack.Screen name="Rooms" component={Rooms} />
+          <Stack.Screen 
+            name="Rooms" 
+            component={Rooms}
+            options={{
+              title: 'Rooms',
+              headerRight: () => (
+                <UserSettingsButton
+                  photoUrl={user.photoURL || 'https://example.com/default-photo.png'}
+                />
+              ),
+            }}
+          />
           <Stack.Screen name="Chat" component={Chat} />
 
         </Stack.Navigator>
