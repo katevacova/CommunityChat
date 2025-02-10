@@ -11,9 +11,10 @@ import {
     statusCodes,
 } from "@react-native-google-signin/google-signin";
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { useUser } from '../UserContext.tsx';
+import { useUser } from '../hooks/UserContext.tsx';
 import { Pressable, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react';
+import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 
 const SignIn: React.FC<SignInProps> = ({ navigation }) => {
 
@@ -127,7 +128,29 @@ const SignIn: React.FC<SignInProps> = ({ navigation }) => {
             </Pressable>
         )
     }
-    const goToRooms = () => { navigation.navigate('Rooms') };
+
+    async function onFacebookButtonPress() { 
+      Alert.alert("Facebook sign-in is not yet provided. Please try another sign-in method.");
+      /*// Attempt login with permissions
+      const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+    
+      if (result.isCancelled) {
+        throw 'User cancelled the login process';
+      }
+    
+      // Once signed in, get the users AccessToken
+      const data = await AccessToken.getCurrentAccessToken();
+    
+      if (!data) {
+        throw 'Something went wrong obtaining access token';
+      }
+    
+      // Create a Firebase credential with the AccessToken
+      const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
+    
+      // Sign-in the user with the credential
+      return auth().signInWithCredential(facebookCredential);*/
+    }
 
     return (
         <View style={styles.container}>
@@ -136,7 +159,7 @@ const SignIn: React.FC<SignInProps> = ({ navigation }) => {
 
         {renderGoogleSigninButton()}
 
-        <TouchableOpacity style={styles.socialButton} onPress={goToRooms}>
+        <TouchableOpacity style={styles.socialButton} onPress={onFacebookButtonPress}>
           <Icon name="facebook" size={20} color="#000" />
           <Text style={styles.socialButtonText}>Continue with Facebook</Text>
         </TouchableOpacity>

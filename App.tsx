@@ -18,9 +18,10 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import SignIn from './screens/SignIn';
 import Chat from './screens/Chat';
 import Rooms from './screens/Rooms';
+import Settings from './screens/Settings.tsx';
 import { RootStackParamList } from './types'; 
 import auth from '@react-native-firebase/auth';
-import { UserProvider, useUser } from './UserContext.tsx';
+import { UserProvider, useUser } from './hooks/UserContext.tsx';
 import UserSettingsButton from './components/UserSettingsButton.tsx';
 
 import {
@@ -106,6 +107,7 @@ function App(): React.JSX.Element {
             }}
           />
           <Stack.Screen name="Chat" component={Chat} />
+          <Stack.Screen name="Settings" component={Settings}/>
 
         </Stack.Navigator>
       </NavigationContainer>
@@ -132,7 +134,7 @@ const styles = StyleSheet.create({
 });
 
 export default () => (
-  <UserProvider>
-    <App/>
-  </UserProvider>
+    <UserProvider>
+        <App/>
+    </UserProvider>
 );

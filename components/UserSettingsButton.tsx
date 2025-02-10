@@ -12,7 +12,7 @@ const UserPhotoButton: React.FC<UserPhotoButtonProps> = ({ photoUrl }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handlePress = () => {
-    navigation.navigate('Chat');
+    navigation.navigate('Settings');
   };
 
   return (
