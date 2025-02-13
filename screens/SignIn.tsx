@@ -15,6 +15,7 @@ import { useUser } from '../hooks/UserContext.tsx';
 import { Pressable, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import firestore from '@react-native-firebase/firestore';
 
 const SignIn: React.FC<SignInProps> = ({ navigation }) => {
 
@@ -38,7 +39,36 @@ const SignIn: React.FC<SignInProps> = ({ navigation }) => {
   }, []); */
 
   const user = useUser().user;
+  
+  async function createUserProfile(user: FirebaseAuthTypes.User) {
+    if (!user) return;
 
+    const userRef = firestore().collection('users').doc(user.uid);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+        await userRef.set({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || ''
+        });
+
+        const chatRoomsRef = firestore().collection('chatRooms');
+        const chatRoomsSnapshot = await chatRoomsRef.get();
+
+        chatRoomsSnapshot.forEach(async (roomDoc) => {
+          const roomRef = chatRoomsRef.doc(roomDoc.id);
+          await roomRef.update({
+            users: firestore.FieldValue.arrayUnion({
+              uid: user.uid,
+              displayName: user.displayName || '',
+            })
+          });
+        });
+        
+    }
+}
 
     async function onGoogleButtonPress() {
         if (user) {
@@ -77,7 +107,10 @@ const SignIn: React.FC<SignInProps> = ({ navigation }) => {
             const googleCredential = auth.GoogleAuthProvider.credential(data.idToken);
       
             // Sign-in the user with the credential
-            return auth().signInWithCredential(googleCredential);
+            const userCredential = await auth().signInWithCredential(googleCredential);
+
+            await createUserProfile(userCredential.user);
+            return
           } else if (type === 'cancelled') {
             // When the user cancels the flow for any operation that requires user interaction.
             return; // do nothing

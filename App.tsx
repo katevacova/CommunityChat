@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import type {PropsWithChildren} from 'react';
+import addMockRooms from './mockData.ts';
 import {
   SafeAreaView,
   ScrollView,
@@ -71,6 +72,10 @@ function App(): React.JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };*/
+
+  useEffect(() => {
+    addMockRooms();
+  }, []);
 
   const userProvider = useUser();
   const user = userProvider.user;

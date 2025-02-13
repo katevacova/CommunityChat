@@ -1,94 +1,78 @@
-import React, { useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Animated, TouchableWithoutFeedback, Pressable } from 'react-native';
-import { RoomsProps } from '../Props';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, FlatList, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { RoomsProps } from '../Props.tsx';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
 const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
 
-    const mockup_rooms = [
-    {
-      id: '1',
-      name: 'General Chat',
-      picture: 'https://engineering.fb.com/wp-content/uploads/2009/02/chat.jpg',
-      numberOfUsers: 10,
-      messages: [
-        'Hey everyone, welcome to the general chat!',
-        'How is everyone doing today?',
-        'Don\'t forget about the meeting tomorrow.',
-      ],
-    },
-    {
-      id: '2',
-      name: 'Tech Talk',
-      picture: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrSua60tQ-2e7gX5AgXwI7kn_Ym01QIAR9JA&s',
-      numberOfUsers: 25,
-      messages: [
-        'Did you see the latest tech news?',
-        'The new iPhone was just announced!',
-        'What do you think about the new AI technology?',
-      ],
-    },
-    {
-      id: '3',
-      name: 'Gaming',
-      picture: 'https://www.bluent.com/images/wher-are-we-going.webp',
-      numberOfUsers: 15,
-      messages: [
-        'Who is up for a game tonight?',
-        'I just got the new console!',
-        'Let\'s play some multiplayer games.',
-      ],
-    },
-    {
-      id: '4',
-      name: 'Music Lovers',
-      picture: 'https://variety.com/wp-content/uploads/2022/07/Music-Streaming-Wars.jpg',
-      numberOfUsers: 20,
-      messages: [
-        'Check out this new album!',
-        'What\'s your favorite song?',
-        'Let\'s create a playlist together.',
-      ],
-    },
-    {
-      id: '5',
-      name: 'Travel Buddies',
-      picture: 'https://www.assahifa.com/english/wp-content/uploads/2021/03/travel-plane-wttc.jpg',
-      numberOfUsers: 8,
-      messages: [
-        'Planning a trip to Japan next month!',
-        'Anyone interested in a weekend getaway?',
-        'Let\'s share our travel experiences.',
-      ],
-    },
-  ];
+  type ChatRoom = {
+    id: string;
+    name: string;
+    photoUrl?: string;
+    numberOfUsers: number;
+    lastMessage?: string;
+  };
+
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('chatRooms')
+      .orderBy('lastMessageTimestamp', 'desc')
+      .onSnapshot(snapshot => {
+        const rooms = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name ?? 'Unknown Room',
+            photoUrl: data.photoUrl ?? '',
+            numberOfUsers: data.numberOfUsers ?? 0,
+            lastMessage: data.lastMessage ?? '',
+          } as ChatRoom;
+        });
+        setChatRooms(rooms);
+        setLoading(false);
+        console.log(chatRooms);
+      });
+
+    return () => unsubscribe();
+  }, []);
 
   async function handlePress() {
     navigation.navigate('Chat');
   }
 
 
-  const renderItem = ({ item }: { item: { id: string; name: string; picture: string; numberOfUsers: number; messages: string[] } }) => (
-    <TouchableWithoutFeedback onPress={() => handlePress()}>
+  const renderItem = ({ item }: { item: ChatRoom }) => (
+    <Pressable onPress={() => handlePress()}>
       <View style={styles.roomContainer}>
-        <Image source={{ uri: item.picture }} style={styles.roomImage} />
+        <Image source={{ uri: item.photoUrl ?? 'https://default-image-url.com' }} style={styles.roomImage} />
         <View style={styles.roomInfo}>
           <Text style={styles.roomName} numberOfLines={1}>{item.name}</Text>
           <Text style={styles.roomUsers}>{item.numberOfUsers} users</Text>
-          <Text style={styles.roomMessage} numberOfLines={1}>{item.messages[item.messages.length - 1]}</Text>
+          <Text style={styles.roomMessage} numberOfLines={1}>{item.lastMessage}</Text>
         </View>
       </View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, padding: 20 }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <FlatList
-      data={mockup_rooms}
+      data={chatRooms}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.container}
-    />
-  );
-};
+    />);
+  }
 
 const styles = StyleSheet.create({
   container: {
@@ -108,7 +92,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
-    alignItems: 'center', // Center items vertically
+    alignItems: 'center',
   },
   roomImage: {
     width: 60,
@@ -137,7 +121,3 @@ const styles = StyleSheet.create({
 });
 
 export default Rooms;
-
-function handlePress(item: { id: string; name: string; picture: string; numberOfUsers: number; messages: string[]; }): void {
-  throw new Error('Function not implemented.');
-}
