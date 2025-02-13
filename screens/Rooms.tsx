@@ -28,7 +28,6 @@ const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
         });
         setChatRooms(rooms);
         setLoading(false);
-        console.log(chatRooms);
       });
 
     return () => unsubscribe();

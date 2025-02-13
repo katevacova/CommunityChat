@@ -1,11 +1,10 @@
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ChatProps } from '../Props.tsx';
 import React, { useState, useEffect } from 'react';
 import firestore from "@react-native-firebase/firestore";
 import { useUser } from '../hooks/UserContext.tsx';
-import Message from '../types.ts';
-import { time } from 'console';
+import { Message } from '../types.ts';
 
 const Chat: React.FC<ChatProps> = ({ route }) => {
   const { room } = route.params;
@@ -15,24 +14,8 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const textRef = React.useRef("");
 
-  useEffect(() => {
-    const messagesRef = firestore()
-      .collection("chatRooms")
-      .doc(room.id)
-      .collection("messages")
-      .limit(20)
-      .orderBy("timestamp", "desc")
-
-    const unsubscribe = messagesRef.onSnapshot(snapshot => {
-      const loadedMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMessages(loadedMessages);
-    });
-
-    return () => unsubscribe();
-  }, [room.id]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastMessage, setLastMessage] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -40,7 +23,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
       .doc(room.id)
       .collection('messages')
       .orderBy('timestamp', 'desc')
-      .limit(50)
+      .limit(3)
       .onSnapshot(snapshot => {
         const messages = snapshot.docs.map(doc => {
           const data = doc.data();
@@ -54,11 +37,40 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
         });
         setMessages(messages);
         setLoading(false);
-        console.log(messages);
+        setLastMessage(snapshot.docs[snapshot.docs.length - 1]);
       });
 
     return () => unsubscribe();
   }, []);
+
+  const loadMoreMessages = async () => {
+    console.log('loading more messages');
+    if (!lastMessage || loadingMore) return;
+
+    setLoadingMore(true);
+    const messagesRef = firestore()
+      .collection("chatRooms")
+      .doc(room.id)
+      .collection("messages")
+      .orderBy("timestamp", "desc")
+      .startAfter(lastMessage)
+      .limit(3)
+      .onSnapshot(snapshot => {
+        const newMessages = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            text: data.text ?? '',
+            senderId: data.senderId ?? '',
+            senderName: data.senderName ?? '',
+            timestamp: data.timestamp ?? '',
+          } as Message;
+        });
+      setMessages(prevMessages => [...prevMessages, ...newMessages]); // Append older messages to existing list
+      setLastMessage(snapshot.docs[snapshot.docs.length - 1]);
+      });
+      setLoadingMore(false);
+  };
 
   const sendMessage = async () => {
     if (!textRef.current.trim()) return;
@@ -78,18 +90,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
   
     textRef.current = "";
   };
-
-  
     
-      /*const handleSend = async () => {
-         let newMessage = textRef.current.trim();
-         if (!newMessage) return;
-         try {
-            
-         } catch (error) {
-            Alert.alert('Error', error.message);
-         }
-      };*/
     
       const renderItem = ({ item }: { item: Message} ) => (
         <View style={styles.messageContainer}>
@@ -101,13 +102,22 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
     
       return (
         <SafeAreaView style={styles.container}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#30668D" style={{ flex: 1 }} />
+      ) : (
+          <View style={{marginBottom: 100, alignSelf: "flex-end", width: "100%", alignItems: "flex-end"}}>
           <FlatList
             data={messages}
             inverted
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.messagesContainer}
+            onEndReached={loadMoreMessages}
+            onEndReachedThreshold={0.2}
+            ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="#30668D" /> : null}
           />
+          </View>
+      )}
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
@@ -141,6 +151,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
         messagesContainer: {
           flexGrow: 1,
           padding: 10,
+          width: '100%',
         },
         messageContainer: {
           marginBottom: 15,
@@ -152,6 +163,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
           shadowOpacity: 0.1,
           shadowRadius: 8,
           elevation: 2,
+          width: '100%',
         },
         sender: {
           fontSize: 16,
