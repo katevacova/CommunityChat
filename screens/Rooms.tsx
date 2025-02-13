@@ -2,19 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { RoomsProps } from '../Props.tsx';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { useUser } from '../hooks/UserContext.tsx';
+import { ChatRoom } from '../types.ts';
 
 const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
 
-  type ChatRoom = {
-    id: string;
-    name: string;
-    photoUrl?: string;
-    numberOfUsers: number;
-    lastMessage?: string;
-  };
-
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useUser();
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -39,13 +34,13 @@ const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  async function handlePress() {
-    navigation.navigate('Chat');
+  async function handlePress(room: ChatRoom) {
+    navigation.navigate('Chat', { room });
   }
 
 
   const renderItem = ({ item }: { item: ChatRoom }) => (
-    <Pressable onPress={() => handlePress()}>
+    <Pressable onPress={() => handlePress(item)}>
       <View style={styles.roomContainer}>
         <Image source={{ uri: item.photoUrl ?? 'https://default-image-url.com' }} style={styles.roomImage} />
         <View style={styles.roomInfo}>

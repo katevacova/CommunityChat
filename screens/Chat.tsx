@@ -1,54 +1,101 @@
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
-import { ChatProps } from '../Props';
-import React, { useState } from 'react';
+import { ChatProps } from '../Props.tsx';
+import React, { useState, useEffect } from 'react';
+import firestore from "@react-native-firebase/firestore";
+import { useUser } from '../hooks/UserContext.tsx';
+import Message from '../types.ts';
+import { time } from 'console';
 
-const Chat: React.FC<ChatProps> = ({ navigation }) => {
+const Chat: React.FC<ChatProps> = ({ route }) => {
+  const { room } = route.params;
+  const { user } = useUser();
+  const [loading, setLoading] = useState(true);
 
-    const mockMessages = [
-        {
-          id: '1',
-          text: 'Hey everyone, welcome to the chat!',
-          sender: 'Alice',
-          timestamp: '2023-10-01T10:00:00Z',
-        },
-        {
-          id: '2',
-          text: 'Hi Alice! How are you?',
-          sender: 'Bob',
-          timestamp: '2023-10-01T10:01:00Z',
-        },
-        {
-          id: '3',
-          text: 'I\'m good, thanks! How about you?',
-          sender: 'Alice',
-          timestamp: '2023-10-01T10:02:00Z',
-        },
-        {
-          id: '4',
-          text: 'Doing well, just working on a project.',
-          sender: 'Bob',
-          timestamp: '2023-10-01T10:03:00Z',
-        },
-        {
-          id: '5',
-          text: 'That sounds interesting. What project?',
-          sender: 'Alice',
-          timestamp: '2023-10-01T10:04:00Z',
-        },
-      ];
+  const [messages, setMessages] = useState<Message[]>([]);
+  const textRef = React.useRef("");
 
-      const [messages, setMessages] = useState(mockMessages);
-      const [newMessage, setNewMessage] = useState('');
+  useEffect(() => {
+    const messagesRef = firestore()
+      .collection("chatRooms")
+      .doc(room.id)
+      .collection("messages")
+      .limit(20)
+      .orderBy("timestamp", "desc")
+
+    const unsubscribe = messagesRef.onSnapshot(snapshot => {
+      const loadedMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMessages(loadedMessages);
+    });
+
+    return () => unsubscribe();
+  }, [room.id]);
+
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('chatRooms')
+      .doc(room.id)
+      .collection('messages')
+      .orderBy('timestamp', 'desc')
+      .limit(50)
+      .onSnapshot(snapshot => {
+        const messages = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            text: data.text ?? '',
+            senderId: data.senderId ?? '',
+            senderName: data.senderName ?? '',
+            timestamp: data.timestamp ?? '',
+          } as Message;
+        });
+        setMessages(messages);
+        setLoading(false);
+        console.log(messages);
+      });
+
+    return () => unsubscribe();
+  }, []);
+
+  const sendMessage = async () => {
+    if (!textRef.current.trim()) return;
+  
+    const messageData = {
+      text: textRef.current,
+      senderId: user?.uid,
+      senderName: user?.displayName || "",
+      timestamp: firestore.FieldValue.serverTimestamp(),
+    };
+  
+    await firestore()
+      .collection("chatRooms")
+      .doc(room.id)
+      .collection("messages")
+      .add(messageData);
+  
+    textRef.current = "";
+  };
+
+  
     
-      const handleSend = () => {
-      };
+      /*const handleSend = async () => {
+         let newMessage = textRef.current.trim();
+         if (!newMessage) return;
+         try {
+            
+         } catch (error) {
+            Alert.alert('Error', error.message);
+         }
+      };*/
     
-      const renderItem = ({ item }: { item: { id: string; text: string; sender: string; timestamp: string } }) => (
+      const renderItem = ({ item }: { item: Message} ) => (
         <View style={styles.messageContainer}>
-          <Text style={styles.sender}>{item.sender}</Text>
+          <Text style={styles.sender}>{item.senderName}</Text>
           <Text style={styles.message}>{item.text}</Text>
-          <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleTimeString()}</Text>
+          <Text style={styles.timestamp}>{new Date(item.timestamp.seconds * 1000).toLocaleTimeString()}</Text>
         </View>
       );
     
@@ -56,6 +103,7 @@ const Chat: React.FC<ChatProps> = ({ navigation }) => {
         <SafeAreaView style={styles.container}>
           <FlatList
             data={messages}
+            inverted
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.messagesContainer}
@@ -63,11 +111,10 @@ const Chat: React.FC<ChatProps> = ({ navigation }) => {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              value={newMessage}
-              onChangeText={setNewMessage}
+              onChangeText={value => textRef.current = value}
               placeholder="Type a message"
             />
-            <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+            <TouchableOpacity style={styles.sendButton} onPress={() => sendMessage()}>
               <Icon name="send" size={20} color="#fff" />
             </TouchableOpacity>
           </View>

@@ -1,8 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
+interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+}
 
 interface UserContextProps {
-  user: FirebaseAuthTypes.User | null;
+  user: UserProfile | null;
   initializing: boolean;
 }
 
@@ -13,11 +21,29 @@ interface UserProviderProps {
 const UserContext = createContext<UserContextProps | undefined>(undefined);
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [initializing, setInitializing] = useState(true);
 
-  function onAuthStateChanged(user: FirebaseAuthTypes.User | null) {
-    setUser(user);
+  async function onAuthStateChanged(authUser: FirebaseAuthTypes.User | null) {
+    if (authUser) {
+      const userRef = firestore().collection('users').doc(authUser.uid);
+      const userDoc = await userRef.get();
+      if (userDoc.exists) {
+        setUser(userDoc.data() as UserProfile);
+      } else {
+        // Create a new user profile if it doesn't exist
+        const newUserProfile: UserProfile = {
+          uid: authUser.uid,
+          email: authUser.email || '',
+          displayName: authUser.displayName || '',
+          photoURL: authUser.photoURL || '',
+        };
+        await userRef.set(newUserProfile);
+        setUser(newUserProfile);
+      }
+    } else {
+      setUser(null);
+    }
     if (initializing) setInitializing(false);
   }
 
@@ -35,6 +61,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
 export const useUser = (): UserContextProps => {
   const context = useContext(UserContext);
+  console.log(context?.user?.uid);
   if (!context) {
     throw new Error('useUser must be used within a UserProvider');
   }
