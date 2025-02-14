@@ -1,12 +1,7 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useState, useEffect } from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import addMockRooms from './mockData.ts';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,88 +10,100 @@ import {
   Text,
   useColorScheme,
   View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
 } from 'react-native';
+import SignIn from './screens/SignIn';
+import Chat from './screens/Chat';
+import Rooms from './screens/Rooms';
+import Settings from './screens/Settings.tsx';
+import { RootStackParamList } from './types'; 
+import { UserProvider, useUser } from './hooks/UserContext.tsx';
+import UserSettingsButton from './components/UserSettingsButton.tsx';
+import messaging from '@react-native-firebase/messaging';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  (globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  useEffect(() => {
+    addMockRooms();
+  }, []);
+
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  
+    if (enabled) {
+      console.log('Notification permission granted.');
+    } else {
+      Alert.alert('Permission required', 'Please enable notifications in settings.');
+    }
+  }
+
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
+
+  const userProvider = useUser();
+  const user = userProvider.user;
+
+  if (userProvider.initializing) return ( // Splash screen
+    <View style={styles.splashContainer}>
+      <Text style={styles.splashText}>CommunityChat</Text>
+    </View>
+  );
+
+  if (!user) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="SignIn">
+          <Stack.Screen name="SignIn" component={SignIn}/>
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Rooms">
+          <Stack.Screen 
+            name="Rooms" 
+            component={Rooms}
+            options={{
+              title: 'Rooms',
+              headerRight: () => (
+                <UserSettingsButton
+                  photoUrl={user?.photoURL || 'https://example.com/default-photo.png'}
+                />
+              ),
+            }}
+          />
+          <Stack.Screen name="Chat" component={Chat} />
+          <Stack.Screen name="Settings" component={Settings}/>
+
+        </Stack.Navigator>
+      </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#30668D',
+  },
+  splashText: {
+    fontSize: 45,
+    fontWeight: '800',
+    color: '#fff',
+  },
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
@@ -115,4 +122,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default () => (
+    <UserProvider>
+        <App/>
+    </UserProvider>
+);
