@@ -11,8 +11,7 @@ export type RootStackParamList = {
     id: string;
     name: string;
     photoUrl?: string;
-    numberOfUsers: number;
-    lastMessage?: string;
+    description?: string;
     lastMessageTimestamp: FirebaseFirestoreTypes.Timestamp;
     members: { uid: string; displayName: string; photoURL: string }[];
     messages: Message[];
@@ -23,5 +22,6 @@ export type RootStackParamList = {
     text: string;
     senderId: string;
     senderName: string;
+    senderPhotoURL: string;
     timestamp: FirebaseFirestoreTypes.Timestamp;
   }

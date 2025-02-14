@@ -48,6 +48,7 @@
 		3B4392A12AC88292D35C810B /* Pods-CommunityChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommunityChat.debug.xcconfig"; path = "Target Support Files/Pods-CommunityChat/Pods-CommunityChat.debug.xcconfig"; sourceTree = "<group>"; };
 		4148D97DF0D94B55B5474B66 /* FontAwesome6_Brands.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome6_Brands.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome6_Brands.ttf"; sourceTree = "<group>"; };
 		4D23E99E2D3E868E00D91403 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		4DE41FB42D5F6E5C00583D78 /* CommunityChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = CommunityChat.entitlements; path = CommunityChat/CommunityChat.entitlements; sourceTree = "<group>"; };
 		50732D024FD442A7BB849697 /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-CommunityChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommunityChat.release.xcconfig"; path = "Target Support Files/Pods-CommunityChat/Pods-CommunityChat.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-CommunityChat-CommunityChatTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommunityChat-CommunityChatTests.debug.xcconfig"; path = "Target Support Files/Pods-CommunityChat-CommunityChatTests/Pods-CommunityChat-CommunityChatTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -110,6 +111,7 @@
 		13B07FAE1A68108700A75B9A /* CommunityChat */ = {
 			isa = PBXGroup;
 			children = (
+				4DE41FB42D5F6E5C00583D78 /* CommunityChat.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -535,6 +537,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = CommunityChat/CommunityChat.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = CommunityChat/Info.plist;
@@ -563,6 +566,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = CommunityChat/CommunityChat.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = CommunityChat/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;

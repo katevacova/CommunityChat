@@ -1,11 +1,12 @@
-import { View, Text, ActivityIndicator, FlatList, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacity, ScrollView} from 'react-native';
+import { View, Text, Alert, ActivityIndicator, FlatList, StyleSheet, Image, KeyboardAvoidingView, Platform , SafeAreaView, TextInput, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ChatProps } from '../Props.tsx';
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import firestore, { Timestamp } from "@react-native-firebase/firestore";
 import { useUser } from '../hooks/UserContext.tsx';
 import { Message } from '../types.ts';
-import { time } from 'console';
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import storage from "@react-native-firebase/storage";
 
 const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
   const { room } = route.params;
@@ -18,6 +19,8 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
 
   const [loadingMore, setLoadingMore] = useState(false);
   const [lastMessage, setLastMessage] = useState<any>(null);
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -38,10 +41,12 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
           return {
             id: doc.id,
             text: data.text ?? '',
+            imageUrl: data.imageUrl ?? '',
             senderId: data.senderId ?? '',
             senderName: data.senderName ?? '',
             senderPhotoURL: data.senderPhotoURL ?? '',
             timestamp: data.timestamp ?? '',
+            type: data.type ?? 'text',
           } as Message;
         });
         setMessages(messages);
@@ -69,10 +74,12 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
           return {
             id: doc.id,
             text: data.text ?? '',
+            imageUrl: data.imageUrl ?? '',
             senderId: data.senderId ?? '',
             senderName: data.senderName ?? '',
             senderPhotoURL: data.senderPhotoURL ?? '',
             timestamp: data.timestamp ?? '',
+            type: data.type ?? 'text',
           } as Message;
         });
       setMessages(prevMessages => [...prevMessages, ...newMessages]); // Append older messages to existing list
@@ -81,15 +88,17 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
       setLoadingMore(false);
   };
 
-  const sendMessage = async () => {
-    if (!textRef.current.trim()) return;
+  const sendMessage = async (content: string, type: "text" | "image" = "text") => {
+    if (!content.trim()) return;
   
     const messageData = {
-      text: textRef.current,
+      text: type === "text" ? content : "",
+      imageUrl: type === "image" ? content : "",
       senderId: user?.uid,
       senderName: user?.displayName || "",
       senderPhotoURL: user?.photoURL || "",
       timestamp: firestore.FieldValue.serverTimestamp(),
+      type,
     };
   
     await firestore()
@@ -103,32 +112,91 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
       .doc(room.id)
       .update({
         lastMessageTimestamp: firestore.FieldValue.serverTimestamp()});
-    console.log(Timestamp.now());
+
     textRef.current = "";
     if (textInputRef.current) {
       textInputRef.current.clear();
     }
+
+    /* if (!notificationsEnabled) {
+      Alert.alert(
+        "Enable Notifications?",
+        "Would you like to receive notifications for this chat room?",
+        [
+          { text: "No", onPress: () => setNotificationsEnabled(false), style: "cancel" },
+          { text: "Yes", onPress: async () => {
+            setNotificationsEnabled(true);
+            await firestore().collection("users").doc(user.uid).update({
+              subscribedRooms: firestore.FieldValue.arrayUnion(room.id),
+            });
+          }},
+        ]
+      );
+    }*/
+  };
+
+  const uploadImage = async (imageUri: string) => {
+    console.log("Uploading image:", imageUri);
+    if (!imageUri) return null;
+  
+    const fileName = imageUri.substring(imageUri.lastIndexOf("/") + 1);
+    const storageRef = storage().ref(`chat_images/${fileName}`);
+  
+    try {
+      await storageRef.putFile(imageUri);
+      const downloadURL = await storageRef.getDownloadURL();
+      return downloadURL;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const pickImage = () => {
+    console.log("Picking image");
+    launchImageLibrary({ mediaType: "photo" }, async (response) => {
+      console.log("Image response:", response);
+      if (!response.didCancel && response.assets) {
+        const imageUri = response.assets[0].uri || "";
+        const imageURL = await uploadImage(imageUri);
+        if (imageURL) sendMessage(imageURL, "image");
+      }
+    });
+  };
+  
+  const takePhoto = () => {
+    launchCamera({ mediaType: "photo" }, async (response) => {
+      console.log("Camera response:", response);
+      if (!response.didCancel && response.assets) {
+        const imageUri = response.assets[0].uri || "";
+        const imageURL = await uploadImage(imageUri);
+        if (imageURL) sendMessage(imageURL, "image");
+      }
+    });
   };
     
     
-      const renderItem = ({ item }: { item: Message} ) => (
-        <View style={styles.messageContainer}>
-          <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+  const renderItem = ({ item }: { item: Message} ) => (
+    <View style={styles.messageContainer}>
+      <View style={{flexDirection: "row", justifyContent: "space-between"}}>
         <Text style={styles.sender}>{item.senderName}</Text>
         <Image source={{ uri: item.senderPhotoURL }} style={styles.userPhoto} />
-        </View>
-        <Text style={styles.message}>{item.text}</Text>
-        <Text style={styles.timestamp}>{new Date(item.timestamp.seconds * 1000).toLocaleTimeString()}</Text>
+      </View>
+      {item.type === "image" ? (
+      <Image source={{ uri: item.imageUrl }} style={styles.chatImage} />
+    ) : (
+      <Text style={styles.message}>{item.text}</Text>
+    )}
+      <Text style={styles.timestamp}>{new Date(item.timestamp.seconds * 1000).toLocaleTimeString()}</Text>
     </View>
-      );
+  );
     
-      return (
-        <SafeAreaView style={styles.container}>
+  return (
+    <SafeAreaView style={styles.container}>
       {loading ? (
         <ActivityIndicator size="large" color="#30668D" style={{ flex: 1 }} />
       ) : (
-          <View style={{marginBottom: 100, alignSelf: "flex-end", width: "100%", alignItems: "flex-end"}}>
           <FlatList
+            style={{ flex: 1, flexGrow: 1, width: "100%", marginBottom: 45, alignSelf: "flex-end", height: "100%"}}
             data={messages}
             inverted
             renderItem={renderItem}
@@ -138,107 +206,128 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
             onEndReachedThreshold={0.2}
             ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="#30668D" /> : null}
           />
-          </View>
       )}
-          <View style={styles.inputContainer}>
-            <TextInput
-              ref={textInputRef}
-              style={styles.input}
-              onChangeText={value => textRef.current = value}
-              placeholder="Type a message"
-              returnKeyType="send" // Changes keyboard "Enter" button to "Send"
-              onSubmitEditing={sendMessage}
-            />
-            <TouchableOpacity style={styles.sendButton} onPress={() => sendMessage()}>
-              <Icon name="send" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      );
-    };
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
+  style={styles.inputContainerWrapper}>
+      <View style={styles.inputContainer}>
+        <TouchableOpacity onPress={takePhoto} style={styles.sendButton}>
+          <Icon name="camera" size={24} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={pickImage} style={styles.sendButton}>
+          <Icon name="image" size={24} color="#fff" />
+        </TouchableOpacity>
+        <TextInput
+          ref={textInputRef}
+          style={styles.input}
+          onChangeText={(value) => (textRef.current = value)}
+          placeholder="Type a message"
+          returnKeyType="send"
+          onSubmitEditing={() => sendMessage(textRef.current)}
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={() => sendMessage(textRef.current)}>
+          <Icon name="send" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
     
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  logo: {
+    fontSize: 45,
+    fontWeight: '800',
+    marginBottom: 20,
+    color: "#30668D",
+    alignSelf: 'center',
+    textAlign: 'center',
+  },
+  messagesContainer: {
+    flexGrow: 1,
+    padding: 10,
+/*     alignSelf: 'stretch',
+    flex: 1,
+    display: 'flex', */
+  },
+  messageContainer: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+/*     width: '100%',
+    alignSelf: 'flex-start',
+    display: 'flex', */
+  },
+  sender: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  message: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 5,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'right',
+  },
+  inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderTopWidth: 1,
+      borderTopColor: '#ddd',
+      backgroundColor: '#fff',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+    },
+    input: {
+      flex: 1,
+      height: 40,
+      borderColor: '#ccc',
+      borderWidth: 1,
+      borderRadius: 20,
+      paddingHorizontal: 10,
+      marginRight: 10,
+    },
+    sendButton: {
+      backgroundColor: '#30668D',
+      padding: 10,
+      borderRadius: 20,
+      margin: 2,
+    },
+    userPhoto: {
+      width: 30,
+      height: 30,
+      borderRadius: 20,
+      marginRight: 10,
+      alignSelf: 'flex-end',
+    },
+    chatImage: {
+      width: 200,
+      height: 200,
+      borderRadius: 10,
+      marginVertical: 5,
+    },
+    inputContainerWrapper: {
+      flexDirection: "column",
+      justifyContent: "flex-end",
+    },
+});
 
-    const styles = StyleSheet.create({
-        container: {
-          flex: 1,
-          backgroundColor: "#fff",
-          paddingHorizontal: 20,
-          paddingTop: 20,
-        },
-        logo: {
-          fontSize: 45,
-          fontWeight: '800',
-          marginBottom: 20,
-          color: "#30668D",
-          alignSelf: 'center',
-          textAlign: 'center',
-        },
-        messagesContainer: {
-          flexGrow: 1,
-          padding: 10,
-          width: '100%',
-        },
-        messageContainer: {
-          marginBottom: 15,
-          padding: 10,
-          backgroundColor: '#f9f9f9',
-          borderRadius: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 2,
-          width: '100%',
-        },
-        sender: {
-          fontSize: 16,
-          fontWeight: 'bold',
-          marginBottom: 5,
-        },
-        message: {
-          fontSize: 14,
-          color: '#555',
-          marginBottom: 5,
-        },
-        timestamp: {
-          fontSize: 12,
-          color: '#888',
-          textAlign: 'right',
-        },
-        inputContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            borderTopWidth: 1,
-            borderTopColor: '#ddd',
-            backgroundColor: '#fff',
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          },
-          input: {
-            flex: 1,
-            height: 40,
-            borderColor: '#ccc',
-            borderWidth: 1,
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            marginRight: 10,
-          },
-          sendButton: {
-            backgroundColor: '#30668D',
-            padding: 10,
-            borderRadius: 20,
-          },
-          userPhoto: {
-            width: 30,
-            height: 30,
-            borderRadius: 20,
-            marginRight: 10,
-            alignSelf: 'flex-end',
-          },
-      });
-      
-      export default Chat;
+export default Chat;

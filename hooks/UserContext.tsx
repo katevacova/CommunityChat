@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
 
 interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
   photoURL: string;
+  fcmToken: string;
 }
 
 interface UserContextProps {
@@ -37,6 +39,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           email: authUser.email || '',
           displayName: authUser.displayName || '',
           photoURL: authUser.photoURL || '',
+          fcmToken: await messaging().getToken(),
         };
         await userRef.set(newUserProfile);
         setUser(newUserProfile);

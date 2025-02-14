@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import type {PropsWithChildren} from 'react';
 import addMockRooms from './mockData.ts';
 import {
   SafeAreaView,
@@ -13,77 +12,51 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Image
+  Image,
+  Alert,
 } from 'react-native';
-import Icon from "react-native-vector-icons/FontAwesome";
 import SignIn from './screens/SignIn';
 import Chat from './screens/Chat';
 import Rooms from './screens/Rooms';
 import Settings from './screens/Settings.tsx';
 import { RootStackParamList } from './types'; 
-import auth from '@react-native-firebase/auth';
 import { UserProvider, useUser } from './hooks/UserContext.tsx';
 import UserSettingsButton from './components/UserSettingsButton.tsx';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import Splash from './screens/Splash';
-
-/*type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}*/
+import messaging from '@react-native-firebase/messaging';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
-  /*const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };*/
+  (globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
   useEffect(() => {
     addMockRooms();
+  }, []);
+
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  
+    if (enabled) {
+      console.log('Notification permission granted.');
+    } else {
+      Alert.alert('Permission required', 'Please enable notifications in settings.');
+    }
+  }
+
+  useEffect(() => {
+    requestUserPermission();
   }, []);
 
   const userProvider = useUser();
   const user = userProvider.user;
 
   if (userProvider.initializing) return ( // Splash screen
-    <View style={styles.sectionContainer}>
-      <Text style={styles.sectionDescription}>Welcome to CommunityChat</Text>
-      </View>
+    <View style={styles.splashContainer}>
+      <Text style={styles.splashText}>CommunityChat</Text>
+    </View>
   );
 
   if (!user) {
@@ -106,7 +79,7 @@ function App(): React.JSX.Element {
               title: 'Rooms',
               headerRight: () => (
                 <UserSettingsButton
-                  photoUrl={user.photoURL || 'https://example.com/default-photo.png'}
+                  photoUrl={user?.photoURL || 'https://example.com/default-photo.png'}
                 />
               ),
             }}
@@ -120,6 +93,17 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#30668D',
+  },
+  splashText: {
+    fontSize: 45,
+    fontWeight: '800',
+    color: '#fff',
+  },
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,

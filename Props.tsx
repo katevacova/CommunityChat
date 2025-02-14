@@ -1,5 +1,6 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types';
+import { ChatRoom, RootStackParamList } from './types.ts';
+import { RouteProp } from '@react-navigation/native';
 
 export type SignInProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, "SignIn">;
@@ -7,6 +8,7 @@ export type SignInProps = {
 
 export type ChatProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Chat'>;
+  route: RouteProp<RootStackParamList, 'Chat'>;
 };
 
 export type RoomsProps = {
