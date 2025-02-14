@@ -4,6 +4,7 @@ import { RoomsProps } from '../Props.tsx';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { useUser } from '../hooks/UserContext.tsx';
 import { ChatRoom } from '../types.ts';
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
 
@@ -22,8 +23,7 @@ const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
             id: doc.id,
             name: data.name ?? 'Unknown Room',
             photoUrl: data.photoUrl ?? '',
-            numberOfUsers: data.numberOfUsers ?? 0,
-            lastMessage: data.lastMessage ?? '',
+            description: data.description ?? '',
           } as ChatRoom;
         });
         setChatRooms(rooms);
@@ -44,9 +44,9 @@ const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
         <Image source={{ uri: item.photoUrl ?? 'https://default-image-url.com' }} style={styles.roomImage} />
         <View style={styles.roomInfo}>
           <Text style={styles.roomName} numberOfLines={1}>{item.name}</Text>
-          <Text style={styles.roomUsers}>{item.numberOfUsers} users</Text>
-          <Text style={styles.roomMessage} numberOfLines={1}>{item.lastMessage}</Text>
+          <Text style={styles.roomDescription} numberOfLines={2}>{item.description}</Text>
         </View>
+        <Icon name="chevron-right" size={20} color="#888" style={{marginLeft: "auto"}} />
       </View>
     </Pressable>
   );
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     color: '#888',
     marginBottom: 5,
   },
-  roomMessage: {
+  roomDescription: {
     fontSize: 14,
     color: '#555',
   },
