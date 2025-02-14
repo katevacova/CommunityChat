@@ -1,21 +1,29 @@
-import { View, Text, ActivityIndicator, FlatList, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView} from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ChatProps } from '../Props.tsx';
-import React, { useState, useEffect } from 'react';
-import firestore from "@react-native-firebase/firestore";
+import React, { useState, useEffect, useLayoutEffect } from 'react';
+import firestore, { Timestamp } from "@react-native-firebase/firestore";
 import { useUser } from '../hooks/UserContext.tsx';
 import { Message } from '../types.ts';
+import { time } from 'console';
 
-const Chat: React.FC<ChatProps> = ({ route }) => {
+const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
   const { room } = route.params;
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const textRef = React.useRef("");
+  const textInputRef = React.useRef<TextInput>(null);
 
   const [loadingMore, setLoadingMore] = useState(false);
   const [lastMessage, setLastMessage] = useState<any>(null);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: room.name,
+    });
+  }, [navigation, room.name]);
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -23,7 +31,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
       .doc(room.id)
       .collection('messages')
       .orderBy('timestamp', 'desc')
-      .limit(3)
+      .limit(50)
       .onSnapshot(snapshot => {
         const messages = snapshot.docs.map(doc => {
           const data = doc.data();
@@ -32,6 +40,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
             text: data.text ?? '',
             senderId: data.senderId ?? '',
             senderName: data.senderName ?? '',
+            senderPhotoURL: data.senderPhotoURL ?? '',
             timestamp: data.timestamp ?? '',
           } as Message;
         });
@@ -44,7 +53,6 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
   }, []);
 
   const loadMoreMessages = async () => {
-    console.log('loading more messages');
     if (!lastMessage || loadingMore) return;
 
     setLoadingMore(true);
@@ -54,7 +62,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
       .collection("messages")
       .orderBy("timestamp", "desc")
       .startAfter(lastMessage)
-      .limit(3)
+      .limit(10)
       .onSnapshot(snapshot => {
         const newMessages = snapshot.docs.map(doc => {
           const data = doc.data();
@@ -63,6 +71,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
             text: data.text ?? '',
             senderId: data.senderId ?? '',
             senderName: data.senderName ?? '',
+            senderPhotoURL: data.senderPhotoURL ?? '',
             timestamp: data.timestamp ?? '',
           } as Message;
         });
@@ -79,6 +88,7 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
       text: textRef.current,
       senderId: user?.uid,
       senderName: user?.displayName || "",
+      senderPhotoURL: user?.photoURL || "",
       timestamp: firestore.FieldValue.serverTimestamp(),
     };
   
@@ -87,17 +97,29 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
       .doc(room.id)
       .collection("messages")
       .add(messageData);
-  
+
+    await firestore()
+      .collection("chatRooms")
+      .doc(room.id)
+      .update({
+        lastMessageTimestamp: firestore.FieldValue.serverTimestamp()});
+    console.log(Timestamp.now());
     textRef.current = "";
+    if (textInputRef.current) {
+      textInputRef.current.clear();
+    }
   };
     
     
       const renderItem = ({ item }: { item: Message} ) => (
         <View style={styles.messageContainer}>
-          <Text style={styles.sender}>{item.senderName}</Text>
-          <Text style={styles.message}>{item.text}</Text>
-          <Text style={styles.timestamp}>{new Date(item.timestamp.seconds * 1000).toLocaleTimeString()}</Text>
+          <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+        <Text style={styles.sender}>{item.senderName}</Text>
+        <Image source={{ uri: item.senderPhotoURL }} style={styles.userPhoto} />
         </View>
+        <Text style={styles.message}>{item.text}</Text>
+        <Text style={styles.timestamp}>{new Date(item.timestamp.seconds * 1000).toLocaleTimeString()}</Text>
+    </View>
       );
     
       return (
@@ -120,9 +142,12 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
       )}
           <View style={styles.inputContainer}>
             <TextInput
+              ref={textInputRef}
               style={styles.input}
               onChangeText={value => textRef.current = value}
               placeholder="Type a message"
+              returnKeyType="send" // Changes keyboard "Enter" button to "Send"
+              onSubmitEditing={sendMessage}
             />
             <TouchableOpacity style={styles.sendButton} onPress={() => sendMessage()}>
               <Icon name="send" size={20} color="#fff" />
@@ -206,6 +231,13 @@ const Chat: React.FC<ChatProps> = ({ route }) => {
             backgroundColor: '#30668D',
             padding: 10,
             borderRadius: 20,
+          },
+          userPhoto: {
+            width: 30,
+            height: 30,
+            borderRadius: 20,
+            marginRight: 10,
+            alignSelf: 'flex-end',
           },
       });
       
