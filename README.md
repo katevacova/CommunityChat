@@ -4,9 +4,7 @@
 
 ## Screenshot
 
-![ChatRoom1](https://i.imgur.com/uYkYZif.png)
-![Rooms](https://i.imgur.com/uYkYZif.png)
-![SignIn](https://i.imgur.com/8PnY0WE.png)
+<img src="https://i.imgur.com/uYkYZif.png" alt="ChatRoom1" style="zoom: 25%;" /> <img src="https://i.imgur.com/0UaB1TB.png" alt="ChatRooms" style="zoom: 25%;" /> <img src="https://i.imgur.com/8PnY0WE.png" alt="SignIn" style="zoom: 25%;" />
 
 ## Tech Stack
 
