@@ -2,9 +2,9 @@
 
 **CommunityChat** is a real-time chat application built with **React Native** and **TypeScript**, leveraging **Firebase** for authentication, messaging, and push notifications.
 
-## Screenshot
+## Screenshots
 
-<img src="https://i.imgur.com/uYkYZif.png" alt="ChatRoom1" style="zoom: 25%;" /> <img src="https://i.imgur.com/0UaB1TB.png" alt="ChatRooms" style="zoom: 25%;" /> <img src="https://i.imgur.com/8PnY0WE.png" alt="SignIn" style="zoom: 25%;" />
+<img src="https://i.imgur.com/uYkYZif.png" alt="ChatRoom1" width="30%" /> <img src="https://i.imgur.com/0UaB1TB.png" alt="ChatRooms" width="30%" /> <img src="https://i.imgur.com/8PnY0WE.png" alt="SignIn" width="30%"/>
 
 ## Tech Stack
 
