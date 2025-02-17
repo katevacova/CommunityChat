@@ -1,4 +1,4 @@
-import { View, Text, Alert, ActivityIndicator, FlatList, StyleSheet, Image, KeyboardAvoidingView, Platform , SafeAreaView, TextInput, TouchableOpacity, ScrollView} from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, StyleSheet, Image, KeyboardAvoidingView, Platform , SafeAreaView, TextInput, TouchableOpacity} from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ChatProps } from '../Props.tsx';
 import React, { useState, useEffect, useLayoutEffect } from 'react';
@@ -20,7 +20,7 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [lastMessage, setLastMessage] = useState<any>(null);
 
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  //const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -174,7 +174,6 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
     });
   };
     
-    
   const renderItem = ({ item }: { item: Message} ) => (
     <View style={styles.messageContainer}>
       <View style={{flexDirection: "row", justifyContent: "space-between"}}>
@@ -194,6 +193,10 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       {loading ? (
         <ActivityIndicator size="large" color="#30668D" style={{ flex: 1 }} />
+      ) : messages.length === 0 ? (
+        <View style={styles.noMessagesContainer}>
+          <Text style={styles.noMessagesText}>There are no messages yet.</Text>
+        </View>
       ) : (
           <FlatList
             style={{ flex: 1, flexGrow: 1, width: "100%", marginBottom: 45, alignSelf: "flex-end", height: "100%"}}
@@ -208,26 +211,26 @@ const Chat: React.FC<ChatProps> = ({ route, navigation }) => {
           />
       )}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
-  style={styles.inputContainerWrapper}>
-      <View style={styles.inputContainer}>
-        <TouchableOpacity onPress={takePhoto} style={styles.sendButton}>
-          <Icon name="camera" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={pickImage} style={styles.sendButton}>
-          <Icon name="image" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TextInput
-          ref={textInputRef}
-          style={styles.input}
-          onChangeText={(value) => (textRef.current = value)}
-          placeholder="Type a message"
-          returnKeyType="send"
-          onSubmitEditing={() => sendMessage(textRef.current)}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={() => sendMessage(textRef.current)}>
-          <Icon name="send" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
+        style={styles.inputContainerWrapper}>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={takePhoto} style={styles.sendButton}>
+            <Icon name="camera" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={pickImage} style={styles.sendButton}>
+            <Icon name="image" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TextInput
+            ref={textInputRef}
+            style={styles.input}
+            onChangeText={(value) => (textRef.current = value)}
+            placeholder="Type a message"
+            returnKeyType="send"
+            onSubmitEditing={() => sendMessage(textRef.current)}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={() => sendMessage(textRef.current)}>
+            <Icon name="send" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -240,20 +243,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  logo: {
-    fontSize: 45,
-    fontWeight: '800',
-    marginBottom: 20,
-    color: "#30668D",
-    alignSelf: 'center',
-    textAlign: 'center',
-  },
   messagesContainer: {
     flexGrow: 1,
     padding: 10,
-/*     alignSelf: 'stretch',
-    flex: 1,
-    display: 'flex', */
   },
   messageContainer: {
     marginBottom: 15,
@@ -265,9 +257,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
-/*     width: '100%',
-    alignSelf: 'flex-start',
-    display: 'flex', */
   },
   sender: {
     fontSize: 16,
@@ -296,38 +285,47 @@ const styles = StyleSheet.create({
       left: 0,
       right: 0,
     },
-    input: {
-      flex: 1,
-      height: 40,
-      borderColor: '#ccc',
-      borderWidth: 1,
-      borderRadius: 20,
-      paddingHorizontal: 10,
-      marginRight: 10,
+  input: {
+    flex: 1,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    marginRight: 10,
     },
-    sendButton: {
-      backgroundColor: '#30668D',
-      padding: 10,
-      borderRadius: 20,
-      margin: 2,
-    },
-    userPhoto: {
-      width: 30,
-      height: 30,
-      borderRadius: 20,
-      marginRight: 10,
-      alignSelf: 'flex-end',
-    },
-    chatImage: {
-      width: 200,
-      height: 200,
-      borderRadius: 10,
-      marginVertical: 5,
-    },
-    inputContainerWrapper: {
-      flexDirection: "column",
-      justifyContent: "flex-end",
-    },
+  sendButton: {
+    backgroundColor: '#30668D',
+    padding: 10,
+    borderRadius: 20,
+    margin: 2,
+  },
+  userPhoto: {
+    width: 30,
+    height: 30,
+    borderRadius: 20,
+    marginRight: 10,
+    alignSelf: 'flex-end',
+  },
+  chatImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginVertical: 5,
+  },
+  inputContainerWrapper: {
+    flexDirection: "column",
+    justifyContent: "flex-end",
+  },
+  noMessagesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noMessagesText: {
+    fontSize: 18,
+    color: '#888',
+  },
 });
 
 export default Chat;

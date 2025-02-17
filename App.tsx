@@ -3,16 +3,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import addMockRooms from './mockData.ts';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
-  TextInput,
-  TouchableOpacity,
-  Image,
   Alert,
 } from 'react-native';
 import SignIn from './screens/SignIn';
@@ -33,6 +26,7 @@ function App(): React.JSX.Element {
     addMockRooms();
   }, []);
 
+  //notification permission
   async function requestUserPermission() {
     const authStatus = await messaging().requestPermission();
     const enabled =
@@ -103,22 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 45,
     fontWeight: '800',
     color: '#fff',
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
   },
 });
 

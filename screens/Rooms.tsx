@@ -10,7 +10,6 @@ const Rooms: React.FC<RoomsProps> = ({ navigation }) => {
 
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useUser();
 
   useEffect(() => {
     const unsubscribe = firestore()
